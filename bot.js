@@ -82,7 +82,7 @@ client.on('ready', () => {
     readyFlag = true;
     console.log(`Bot ${botIndex + 1} (${client.user.tag}) is ready!`);
     if (!activitySet) {
-      client.user.setActivity('pk vaa').catch(() => {});
+      client.user.setActivity('pk vaa');
       activitySet = true;
     }
   }
