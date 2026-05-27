@@ -307,11 +307,25 @@ async function createBot(botIndex) {
   process.on('uncaughtException',  e => console.error(`[Bot${BOT_NUM}] uncaughtException:`,  e.message));
   process.on('unhandledRejection', r => console.error(`[Bot${BOT_NUM}] unhandledRejection:`, r));
 
-  try {
-    await client.login(token);
-  } catch (e) {
-    console.error(`[Bot${BOT_NUM}] Login failed:`, e.message);
+  const MAX_RETRIES = 5;
+  let retryCount = 0;
+  async function loginWithRetry() {
+    try {
+      await client.login(token);
+    } catch (e) {
+      retryCount++;
+      console.error(`[Bot${BOT_NUM}] Login failed (Attempt ${retryCount}/${MAX_RETRIES}):`, e.message);
+      if (retryCount < MAX_RETRIES) {
+        const delay = Math.min(5000 * Math.pow(2, retryCount), 60000);
+        console.log(`[Bot${BOT_NUM}] Retrying login in ${delay / 1000}s...`);
+        await sleep(delay);
+        return loginWithRetry();
+      } else {
+        console.error(`[Bot${BOT_NUM}] Maximum login retries reached. Bot will remain offline.`);
+      }
+    }
   }
+  await loginWithRetry();
 }
 
 // ── Launch all bots with staggered login ──────────────────────────────────────
