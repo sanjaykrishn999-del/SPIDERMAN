@@ -248,23 +248,29 @@ client.on('messageCreate', async (message) => {
 
   try {
 
-    // ── !join10 ──────────────────────────────────────────────────────────────
-    if (cmd === '!join10') {
+    // ── kotj ──────────────────────────────────────────────────────────────
+    if (cmd === 'kotj' || cmd === '!kotj') {
+      if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+        return err(message, 'You need **Administrator** permission to use this command.');
       if (isConnectionAlive(guildId)) return info(message, `Bot ${BOT_NUM} already in a channel!`);
       if (!voiceChannel)             return err(message, 'Join a voice channel first!');
       const conn = await connectVoice(voiceChannel, message);
       if (conn) await ok(message, `Bot ${BOT_NUM} joined **${voiceChannel.name}**`);
 
-    // ── !st10 — start / resume ───────────────────────────────────────────────
-    } else if (cmd === '!st10') {
-      if (!isConnectionAlive(guildId)) return err(message, 'Use `!join10` first!');
+    // ── kotst — start / resume ───────────────────────────────────────────────
+    } else if (cmd === 'kotst' || cmd === '!kotst') {
+      if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+        return err(message, 'You need **Administrator** permission to use this command.');
+      if (!isConnectionAlive(guildId)) return err(message, 'Use `kotj` first!');
       if (!audioExists)               return err(message, `Audio file missing for Bot ${BOT_NUM}.`);
       state(guildId).looping = true;
       startPlayback(guildId);
       await ok(message, `▶️  Bot ${BOT_NUM} playing (loop ON)`);
 
-    // ── !sp10 — stop ─────────────────────────────────────────────────────────
-    } else if (cmd === '!sp10') {
+    // ── kotsp — stop ─────────────────────────────────────────────────────────
+    } else if (cmd === 'kotsp' || cmd === '!kotsp') {
+      if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+        return err(message, 'You need **Administrator** permission to use this command.');
       const s = state(guildId);
       if (s) {
         s.looping = false;
@@ -273,8 +279,10 @@ client.on('messageCreate', async (message) => {
       }
       await ok(message, `⏹️  Bot ${BOT_NUM} stopped`);
 
-    // ── !ds10 — disconnect ───────────────────────────────────────────────────
-    } else if (cmd === '!ds10') {
+    // ── kotds — disconnect ───────────────────────────────────────────────────
+    } else if (cmd === 'kotds' || cmd === '!kotds') {
+      if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+        return err(message, 'You need **Administrator** permission to use this command.');
       const s = state(guildId);
       if (s) {
         s.looping = false;
@@ -387,20 +395,23 @@ client.on('messageCreate', async (message) => {
       await ok(message, `🔕  ${target.user.tag} deafened`);
 
     // ── !help10 ───────────────────────────────────────────────────────────────
-    } else if (cmd === '!help10') {
+    } else if (cmd === '!help10' || cmd === 'kothelp' || cmd === '!kothelp') {
       const embed = new EmbedBuilder()
         .setColor(0x5865F2)
         .setTitle(`🎧  Bot ${BOT_NUM} — Commands`)
         .addFields(
           {
-            name: '🎵 Audio',
+            name: '🎵 Audio (Admin Only)',
             value: [
-              '`!join10` — Join your voice channel',
-              '`!st10` — Start looping audio',
-              '`!sp10` — Stop audio',
-              '`!ds10` — Disconnect',
-              '`!loop10` — Toggle loop on/off',
+              '`kotj` — Join your voice channel',
+              '`kotst` — Start looping audio',
+              '`kotsp` — Stop audio',
+              '`kotds` — Disconnect'
             ].join('\n')
+          },
+          {
+            name: '🎵 Audio Settings',
+            value: '`!loop10` — Toggle loop on/off'
           },
           {
             name: '🔊 Amplifier',
@@ -425,7 +436,7 @@ client.on('messageCreate', async (message) => {
           },
           {
             name: '📊 Info',
-            value: '`!status10` — Show current amp / EQ / loop status'
+            value: '`!status10` — Show current amp / EQ / loop status\n`kothelp` — Show this help message'
           }
         )
         .setFooter({ text: 'All commands work per-guild · Auto-loop enabled by default' });

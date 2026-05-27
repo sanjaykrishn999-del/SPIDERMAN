@@ -163,25 +163,33 @@ async function createBot(botIndex) {
     const footer  = `Bot ${BOT_NUM}`;
 
     try {
-      if (cmd === '!join10') {
+      if (cmd === 'kotj' || cmd === '!kotj') {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+          return fail(message, 'You need **Administrator** permission to use this command.', footer);
         if (isAlive(guildId)) return info(message, `Bot ${BOT_NUM} already connected!`, footer);
         if (!vc)              return fail(message, 'Join a voice channel first!', footer);
         const conn = await joinVoice(vc, message);
         if (conn) await ok(message, `Bot ${BOT_NUM} joined **${vc.name}**`, footer);
 
-      } else if (cmd === '!st10') {
-        if (!isAlive(guildId))       return fail(message, 'Use `!join10` first!', footer);
+      } else if (cmd === 'kotst' || cmd === '!kotst') {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+          return fail(message, 'You need **Administrator** permission to use this command.', footer);
+        if (!isAlive(guildId))       return fail(message, 'Use `kotj` first!', footer);
         if (!existsSync(audioFile))  return fail(message, `Audio file missing for Bot ${BOT_NUM}`, footer);
         getState(guildId).looping = true;
         startPlayback(guildId);
         await ok(message, `▶️  Bot ${BOT_NUM} playing (loop ON)`, footer);
 
-      } else if (cmd === '!sp10') {
+      } else if (cmd === 'kotsp' || cmd === '!kotsp') {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+          return fail(message, 'You need **Administrator** permission to use this command.', footer);
         const s = getState(guildId);
         if (s) { s.looping = false; try { s.player?.stop(true); } catch {} try { s._ff?.kill(); } catch {} }
         await ok(message, `⏹️  Bot ${BOT_NUM} stopped`, footer);
 
-      } else if (cmd === '!ds10') {
+      } else if (cmd === 'kotds' || cmd === '!kotds') {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator))
+          return fail(message, 'You need **Administrator** permission to use this command.', footer);
         const s = getState(guildId);
         if (s) {
           s.looping = false;
@@ -273,15 +281,16 @@ async function createBot(botIndex) {
         await t.voice.setDeaf(true);
         await ok(message, `🔕  ${t.user.tag} deafened`, footer);
 
-      } else if (cmd === '!help10') {
+      } else if (cmd === '!help10' || cmd === 'kothelp' || cmd === '!kothelp') {
         const e = new EmbedBuilder().setColor(0x5865F2)
           .setTitle(`🎧  Bot ${BOT_NUM} — All Commands`)
           .addFields(
-            { name: '🎵 Audio',      value: '`!join10` `!st10` `!sp10` `!ds10` `!loop10`' },
+            { name: '🎵 Audio (Admin Only)', value: '`kotj` · `kotst` · `kotsp` · `kotds`' },
+            { name: '🎵 Audio Settings',     value: '`!loop10`' },
             { name: '🔊 Amplifier',  value: '`!vol10 <0–200>`' },
             { name: '🎛️ Equalizer', value: '`!eq10 <preset>` · `!eqlist10`' },
             { name: '🛡️ Mod',        value: '`!mute10` `!unmute10` `!vkick10` `!deafen10`' },
-            { name: '📊 Info',       value: '`!status10` · `!help10`' }
+            { name: '📊 Info',       value: '`!status10` · `kothelp`' }
           )
           .setFooter({ text: `Bot ${BOT_NUM} · Auto-loop on by default` });
         await message.reply({ embeds: [e] }).catch(() => {});
