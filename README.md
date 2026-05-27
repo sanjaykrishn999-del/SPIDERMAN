@@ -1,159 +1,75 @@
-# Discord Multi-Bot Voice System
+# 🎧 Dark Empire | Multi-Bot Audio Dashboard v2.0
 
-A production-ready Discord bot system that runs 10 separate bot processes, each capable of joining voice channels and playing synchronized audio.
+A premium, production-ready web dashboard to manage 10 Discord audio bots simultaneously. Control everything from a sleek web interface—no Discord commands needed.
 
-## Features
+## 🚀 Key Features
 
-- **10 Independent Bots**: Each bot runs in its own process with separate Discord tokens
-- **Voice Channel Management**: Bots can join, play audio, stop, and disconnect from voice channels
-- **Synchronized Commands**: All bots respond to global commands simultaneously
-- **Process Separation**: Uses PM2 for reliable process management (no cluster mode)
-- **Error Handling**: Comprehensive error handling for tokens, connections, and audio playback
-- **Rate Limit Safe**: Designed to avoid Discord API rate limits
+- **Fleet Management**: Control 10 bots from a single dashboard.
+- **Web-Only Control**: Join VC, Play, Stop, and Disconnect via the web UI.
+- **Advanced Audio Processing**:
+  - **Master Volume**: 0% to 200% amplification.
+  - **Bass Boost**: Real-time low-end enhancement.
+  - **Playback Speed**: Adjust from 0.5x to 2.0x.
+  - **Looping**: Seamless audio looping.
+- **Real-time Monitoring**: Live logs, bot status, and system resource (CPU/MEM) tracking.
+- **Audio Library**: Upload, store, and manage your MP3 files directly through the web interface.
+- **Stability**: Staggered login/join to avoid Discord rate limits and auto-reconnect logic.
 
-## Requirements
+## 🛠 Tech Stack
 
-- Node.js 16.x or higher
-- FFmpeg (automatically installed via ffmpeg-static)
-- 10 valid Discord bot tokens
-- Audio files: `new1.mp3` through `new10.mp3`
+- **Backend**: Node.js, Express, Socket.IO, Discord.js, @discordjs/voice.
+- **Processing**: FFmpeg (via `fluent-ffmpeg` and `ffmpeg-static`).
+- **Frontend**: Vanilla JS, CSS Glassmorphism, Inter Typography.
 
-## Installation
+## 📦 Installation
 
-1. Clone or download this project
-2. Install dependencies:
+1. **Install Dependencies**:
    ```bash
    npm install
    ```
 
-3. Place your audio files (`new1.mp3` to `new10.mp3`) in the project root directory
+2. **Configure Environment**:
+   Edit `.env` and add your 10 bot tokens:
+   ```env
+   BOT_TOKEN_0=your_token_here
+   BOT_TOKEN_1=your_token_here
+   ...
+   BOT_TOKEN_9=your_token_here
+   PORT=3000
+   ```
 
-4. Update the bot tokens in `bot.js` (replace the placeholder tokens with your actual bot tokens)
+3. **Start the Dashboard**:
+   ```bash
+   npm start
+   ```
 
-## Usage
+4. **Access the UI**:
+   Open `http://localhost:3000` in your browser.
 
-### Starting the Bots
+## 🌐 Deployment Instructions
 
-You have two options to start the bots:
+### 1. Fly.io (Recommended)
+- Install Fly CLI and run `fly launch`.
+- Use the provided `fly.toml` (or let Fly generate one).
+- Set secrets: `fly secrets set BOT_TOKEN_0=... BOT_TOKEN_1=...`
 
-#### Option 1: Using PM2 (Recommended for Production)
-```bash
-npm start
-```
-This starts all 10 bots as separate PM2 processes with monitoring and auto-restart.
+### 2. Render
+- Create a new **Web Service**.
+- Connect your GitHub repo.
+- Environment: Node.
+- Build Command: `npm install`.
+- Start Command: `node server.js`.
+- Add Environment Variables for each bot token.
 
-#### Option 2: Using Node.js Directly
-```bash
-npm run start:node
-# or
-node index.js
-```
-This starts all bots as child processes managed by the main Node.js process.
+### 3. VPS (Ubuntu/Windows)
+- Install Node.js and PM2.
+- Run `pm2 start server.js --name "bot-dashboard"`.
+- Use `pm2 startup` to ensure it starts on boot.
 
-### Stopping the Bots
+## ⚠️ Important Notes
+- **FFmpeg**: The project uses `ffmpeg-static`, so you don't need to install FFmpeg manually on most systems.
+- **Rate Limits**: Bots join VCs with a 1.5s delay to prevent being flagged by Discord.
+- **Persistence**: VC links and audio settings are saved in `./data/config.json`.
 
-For PM2:
-```bash
-npm stop
-```
-
-For Node.js: Press `Ctrl+C` in the terminal where it's running.
-
-### Restarting the Bots
-
-```bash
-npm restart
-```
-
-### Viewing Logs
-
-```bash
-npm run logs
-```
-
-### Deleting PM2 Processes
-
-```bash
-npm run delete
-```
-
-## Discord Commands
-
-All commands must be sent in a text channel where the bots have access:
-
-- `!join10` - All bots join your current voice channel
-- `!st10` - All bots start playing their assigned audio file simultaneously
-- `!sp10` - All bots stop audio playback
-- `!ds10` - All bots disconnect from voice channels
-
-## Architecture
-
-- **Separate Processes**: Each of the 10 bots runs in its own Node.js process
-- **Two Startup Options**:
-  - **PM2**: Production-ready process manager with monitoring and auto-restart
-  - **Node.js Direct**: Master process spawns child processes using `child_process.fork()`
-- **No Shared State**: Bots operate independently, avoiding conflicts
-- **Voice Isolation**: Each bot maintains its own voice connection
-- **Command Synchronization**: Bots respond to commands independently but simultaneously
-
-## File Structure
-
-```
-├── bot.js                 # Main bot script (runs 10 instances)
-├── ecosystem.config.js    # PM2 configuration for 10 processes
-├── package.json           # Dependencies and scripts
-├── new1.mp3              # Audio file for bot 1
-├── new2.mp3              # Audio file for bot 2
-├── ...
-└── new10.mp3             # Audio file for bot 10
-```
-
-## Error Handling
-
-The system includes comprehensive error handling for:
-
-- Invalid or expired bot tokens
-- Voice channel connection failures
-- Audio file playback errors
-- Network issues
-- Graceful shutdown on process termination
-
-## Troubleshooting
-
-### Bots Not Starting
-- Check that all tokens are valid and not expired
-- Ensure bots are invited to your Discord server with proper permissions
-- Check PM2 logs: `npm run logs`
-
-### Render Deployment Notes
-- **Do not exclude audio files from deployment**: if `new1.mp3` ... `new10.mp3` are missing in the runtime container, bots will log audio-missing warnings and `!st10` will fail.
-- This project now includes startup tuning environment variables for low-resource hosts:
-  - `BOT_START_DELAY_MS` (default `5000` in production)
-  - `BOT_RESTART_DELAY_MS` (default `5000`)
-  - `BOT_MAX_RESTART_DELAY_MS` (default `60000`)
-  - `BOT_LOGIN_TIMEOUT_MS` (default `90000`)
-- On Render, set these in the service environment if you want to tune startup behavior further.
-
-### Audio Not Playing
-- Verify audio files exist and are in the correct format (MP3)
-- Check FFmpeg installation
-- Ensure bots have voice channel permissions
-
-### Commands Not Working
-- Make sure you're in a voice channel for `!join10`
-- Check bot permissions in the text channel
-- Verify bots are online and connected
-
-### Rate Limits
-- The system includes delays and proper spacing to avoid rate limits
-- If issues persist, increase delays in the code
-
-## Security Notes
-
-- Never commit real bot tokens to version control
-- Use environment variables for tokens in production
-- Keep audio files appropriately licensed
-
-## License
-
-ISC
+---
+*Created with ❤️ by Antigravity*

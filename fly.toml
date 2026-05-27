@@ -1,0 +1,32 @@
+app = "audio-bot"
+kill_signal = "SIGINT"
+kill_timeout = 5
+
+[build]
+  image = "node:18-alpine"
+
+[env]
+  PORT = "10000"
+  NODE_ENV = "production"
+  NODE_OPTIONS = "--max-old-space-size=512"
+
+[[services]]
+  internal_port = 10000
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = "80"
+
+  [[services.ports]]
+    port = "443"
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [services.tcp_checks]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "1m"
+    restart_limit = 0
