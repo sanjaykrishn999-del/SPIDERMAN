@@ -14,6 +14,7 @@ const { PassThrough } = require('stream');
 const path = require('path');
 const { spawn } = require('child_process');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ffmpegPath = require('ffmpeg-static');
 
 // ─── Bot Identity ────────────────────────────────────────────────────────────
 const botIndex = parseInt(process.argv[2]) || 0;
@@ -84,7 +85,7 @@ function buildResource(guildId) {
   if (filter) afFilter += `,${filter}`;
 
   // Spawn FFmpeg to apply filters and pipe PCM → opus via @discordjs/voice
-  const ffmpeg = spawn('ffmpeg', [
+  const ffmpeg = spawn(ffmpegPath, [
     '-i', audioFile,
     '-af', afFilter,
     '-f', 's16le',

@@ -13,6 +13,7 @@ const path  = require('path');
 const http  = require('http');
 const { spawn } = require('child_process');
 const { existsSync } = require('fs');
+const ffmpegPath = require('ffmpeg-static');
 
 // ── Keep-alive web server (for cloud platforms like Render / Fly) ─────────────
 const port = process.env.PORT || 10000;
@@ -83,7 +84,7 @@ async function createBot(botIndex) {
     let afFilter = `volume=${vol}`;
     if (filter) afFilter += `,${filter}`;
 
-    const ff = spawn('ffmpeg', [
+    const ff = spawn(ffmpegPath, [
       '-i', audioFile, '-af', afFilter,
       '-f', 's16le', '-ar', '48000', '-ac', '2', 'pipe:1'
     ], { stdio: ['ignore', 'pipe', 'ignore'] });

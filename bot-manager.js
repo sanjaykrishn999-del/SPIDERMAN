@@ -11,6 +11,7 @@ const {
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const ffmpegPath = require('ffmpeg-static');
 
 class BotManager {
     constructor(io) {
@@ -291,7 +292,7 @@ class BotManager {
             args.splice(args.indexOf(filePath) + 1, 0, '-af', filterStr);
         }
 
-        const ffmpeg = spawn('ffmpeg', args);
+        const ffmpeg = spawn(ffmpegPath, args);
         bot.ffmpeg = ffmpeg;
         
         ffmpeg.on('error', (err) => {
