@@ -4,8 +4,8 @@
   "description": "Premium Web Dashboard for Multi-Bot Discord Audio Management with Auth",
   "main": "electron-main.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "app": "electron ."
   },
   "dependencies": {
