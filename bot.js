@@ -214,7 +214,11 @@ client.on('ready', () => {
   if (!readyFlag) {
     readyFlag = true;
     console.log(`[Bot${BOT_NUM}] Ready as ${client.user.tag}`);
-    client.user.setActivity(`🎵 pk vaa | Bot ${BOT_NUM}`, { type: 2 }).catch(() => {});
+    try {
+      client.user.setActivity(`🎵 pk vaa | Bot ${BOT_NUM}`, { type: 2 });
+    } catch (e) {
+      console.error(`[Bot${BOT_NUM}] setActivity failed:`, e.message);
+    }
   }
 });
 
