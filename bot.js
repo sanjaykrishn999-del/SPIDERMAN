@@ -13,6 +13,7 @@ const { createReadStream, existsSync } = require('fs');
 const { PassThrough } = require('stream');
 const path = require('path');
 const { spawn } = require('child_process');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // ─── Bot Identity ────────────────────────────────────────────────────────────
 const botIndex = parseInt(process.argv[2]) || 0;
@@ -151,7 +152,8 @@ async function connectVoice(voiceChannel, message) {
     guildId:         guildId,
     adapterCreator:  voiceChannel.guild.voiceAdapterCreator,
     selfMute: false,
-    selfDeaf: false
+    selfDeaf: false,
+    group: client.user.id
   });
 
   try {
@@ -254,6 +256,8 @@ client.on('messageCreate', async (message) => {
         return err(message, 'You need **Administrator** permission to use this command.');
       if (isConnectionAlive(guildId)) return info(message, `Bot ${BOT_NUM} already in a channel!`);
       if (!voiceChannel)             return err(message, 'Join a voice channel first!');
+      // Stagger joins to prevent connection rate-limiting and process collision
+      await sleep(botIndex * 4000);
       const conn = await connectVoice(voiceChannel, message);
       if (conn) await ok(message, `Bot ${BOT_NUM} joined **${voiceChannel.name}**`);
 
@@ -288,6 +292,8 @@ client.on('messageCreate', async (message) => {
         s.looping = false;
         try { s.player?.stop(true); } catch {}
         try { s._ffmpeg?.kill(); }    catch {}
+        // Stagger disconnects to prevent rate limits
+        await sleep(botIndex * 1000);
         try { s.conn.destroy(); }     catch {}
         connections.delete(guildId);
       }

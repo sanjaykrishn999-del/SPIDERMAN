@@ -129,7 +129,8 @@ async function createBot(botIndex) {
     const conn = joinVoiceChannel({
       channelId: vc.id, guildId,
       adapterCreator: vc.guild.voiceAdapterCreator,
-      selfMute: false, selfDeaf: false
+      selfMute: false, selfDeaf: false,
+      group: client.user.id
     });
     try { await entersState(conn, VoiceConnectionStatus.Ready, 20_000); }
     catch { conn.destroy(); await fail(message, 'Voice connect timeout.', `Bot ${BOT_NUM}`); return null; }
@@ -168,6 +169,8 @@ async function createBot(botIndex) {
           return fail(message, 'You need **Administrator** permission to use this command.', footer);
         if (isAlive(guildId)) return info(message, `Bot ${BOT_NUM} already connected!`, footer);
         if (!vc)              return fail(message, 'Join a voice channel first!', footer);
+        // Stagger joins to prevent connection rate-limiting and process collision
+        await sleep(botIndex * 4000);
         const conn = await joinVoice(vc, message);
         if (conn) await ok(message, `Bot ${BOT_NUM} joined **${vc.name}**`, footer);
 
@@ -195,6 +198,8 @@ async function createBot(botIndex) {
           s.looping = false;
           try { s.player?.stop(true); } catch {}
           try { s._ff?.kill(); }         catch {}
+          // Stagger disconnects to prevent rate limits
+          await sleep(botIndex * 1000);
           try { s.conn.destroy(); }      catch {}
           connections.delete(guildId);
         }
